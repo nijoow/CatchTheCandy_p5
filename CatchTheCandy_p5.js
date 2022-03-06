@@ -9,6 +9,7 @@ let gameStartBG,
   basketRed,
   basketBlue;
 let gameOverRedVideo, gameOverBlueVideo;
+let candySound, bombSound, gameStartBGM, gameOnBGM, gameOverBGM;
 
 let gameStart, gameOver;
 let startTimer = 240;
@@ -41,6 +42,13 @@ function preload() {
 
   font = loadFont("./src/font/Pixellari.ttf");
 
+  soundFormats("mp3");
+  candySound = loadSound("./src/sound/candy.mp3");
+  bombSound = loadSound("./src/sound/bomb.mp3");
+  gameStartBGM = loadSound("./src/sound/gameStartBGM.mp3");
+  gameOnBGM = loadSound("./src/sound/gameOnBGM.mp3");
+  gameOverBGM = loadSound("./src/sound/gameOverBGM.mp3");
+
   gameOverRedVideo = createVideo(["./src/video/gameOverRedVideo.mov"]);
   gameOverBlueVideo = createVideo(["./src/video/gameOverBlueVideo.mov"]);
 }
@@ -70,166 +78,168 @@ function setup() {
     candys[i].init();
   }
   bomb.init();
-  gameOverRedVideo.size(windowWidth, windowHeight);
-  gameOverRedVideo.hide();
-  gameOverBlueVideo.hide();
+  candySound.resume();
+  bombSound.resume();
+  gameStartBGM.resume();
+  gameOnBGM.resume();
+  gameOverBGM.resume();
+  // gameOverRedVideo.size(windowWidth, windowHeight);
+  // gameOverRedVideo.hide();
+  // gameOverBlueVideo.hide();
 }
 
 function draw() {
-  image(gameOverRedVideo, 0, 0, 500, 500);
-  // if (gameStart == false && gameOver == false) {
-  //   //  게임 시작전
-  //   image(
-  //     gameStartBG,
-  //     windowWidth / 2,
-  //     windowHeight / 2,
-  //     windowWidth,
-  //     windowHeight
-  //   );
-  //   image(
-  //     gameName,
-  //     windowWidth / 2,
-  //     windowHeight / 2 - windowHeight / 5,
-  //     (windowWidth / 3) * 2,
-  //     windowHeight / 4
-  //   );
-  //   gameStartText.move();
-  //   gameStartText.opacity();
-  //   gameStartText.display();
-  //   // if (gameStartBGM.isPlaying() == false) {
-  //   //   gameStartBGM.rewind();
-  //   // }
-  //   // gameStartBGM.play();
-  //   // gameOverBGM.pause();
-  //   // gameOverBGM.rewind();
-  //   gameTimer = maxGameTimer;
-  //   score = 0;
-  //   gameOverTimer = maxGameOverTimer;
-  //   scoreText = new ScoreText(0, 0, "");
-  //   if (selectBasket === "red") {
-  //     basket = new Basket(selectBasket);
-  //     gameStart = true;
-  //   } else if (selectBasket === "blue") {
-  //     basket = new Basket(selectBasket);
-  //     gameStart = true;
-  //   }
-  // }
-  // if (gameStart == true && gameOver == false) {
-  //   //  게임화면
-  //   // gameStartBGM.pause();
-  //   // gameStartBGM.rewind();
-  //   // gameOnBGM.play();
-  //   image(
-  //     backGround,
-  //     windowWidth / 2,
-  //     windowHeight / 2,
-  //     windowWidth,
-  //     windowHeight
-  //   );
-  //   fill(59, 20, 93);
-  //   textFont(font, windowWidth / 25);
-  //   text(score, windowWidth / 10.5, windowHeight / 5);
-  //   gameTimerSec = Math.floor(gameTimer / 60) % 60;
-  //   text(gameTimerSec, windowWidth - windowWidth / 13.5, windowHeight / 5);
-  //   textFont(font, windowWidth / 15);
-  //   fill(255);
-  //   startTimerSec = Math.floor(startTimer / 60) % 60;
-  //   if (startTimerSec < 4 && startTimerSec > 0)
-  //     text(startTimerSec, windowWidth / 2, windowHeight / 2);
-  //   startTimer -= 1;
-  //   basketX = mouseX;
-  //   basket.display();
-  //   if (startTimerSec < 1 && startTimerSec >= 0)
-  //     text("Game Start!", width / 2, height / 2);
-  //   if (startTimerSec <= 0) {
-  //     for (let i = 0; i < candys.length; i++) {
-  //       candys[i].move();
-  //       candys[i].display();
-  //       candys[i].catched();
-  //     }
-  //     bomb.move();
-  //     bomb.display();
-  //     bomb.catched();
-  //     basket.display();
-  //     scoreText.display();
+  if (gameStart == false && gameOver == false) {
+    //  게임 시작전
+    image(
+      gameStartBG,
+      windowWidth / 2,
+      windowHeight / 2,
+      windowWidth,
+      windowHeight
+    );
+    image(
+      gameName,
+      windowWidth / 2,
+      windowHeight / 2 - windowHeight / 5,
+      (windowWidth / 3) * 2,
+      windowHeight / 4
+    );
+    gameStartText.move();
+    gameStartText.opacity();
+    gameStartText.display();
+    if (gameStartBGM.isPlaying() == false) {
+      gameStartBGM.jump(0);
+    }
+    gameStartBGM.play();
+    gameOverBGM.pause();
+    gameOverBGM.jump(0);
+    gameTimer = maxGameTimer;
+    score = 0;
+    gameOverTimer = maxGameOverTimer;
+    scoreText = new ScoreText(0, 0, "");
+    if (selectBasket === "red") {
+      basket = new Basket(selectBasket);
+      gameStart = true;
+    } else if (selectBasket === "blue") {
+      basket = new Basket(selectBasket);
+      gameStart = true;
+    }
+  }
+  if (gameStart == true && gameOver == false) {
+    //  게임화면
+    gameStartBGM.pause();
+    gameStartBGM.jump(0);
+    gameOnBGM.play();
+    image(
+      backGround,
+      windowWidth / 2,
+      windowHeight / 2,
+      windowWidth,
+      windowHeight
+    );
+    fill(59, 20, 93);
+    textFont(font, windowWidth / 25);
+    text(score, windowWidth / 10.5, windowHeight / 5);
+    gameTimerSec = Math.floor(gameTimer / 60) % 60;
+    text(gameTimerSec, windowWidth - windowWidth / 13.5, windowHeight / 5);
+    textFont(font, windowWidth / 15);
+    fill(255);
+    startTimerSec = Math.floor(startTimer / 60) % 60;
+    if (startTimerSec < 4 && startTimerSec > 0)
+      text(startTimerSec, windowWidth / 2, windowHeight / 2);
+    startTimer -= 1;
+    basketX = mouseX;
+    basket.display();
+    if (startTimerSec < 1 && startTimerSec >= 0)
+      text("Game Start!", width / 2, height / 2);
+    if (startTimerSec <= 0) {
+      for (let i = 0; i < candys.length; i++) {
+        candys[i].move();
+        candys[i].display();
+        candys[i].catched();
+      }
+      bomb.move();
+      bomb.display();
+      bomb.catched();
+      basket.display();
+      scoreText.display();
 
-  //     image(scoreTime, width / 2, height / 2, windowWidth, windowHeight);
-  //     fill(59, 20, 93);
-  //     textFont(font, windowWidth / 25);
-  //     text(score, windowWidth / 10.5, windowHeight / 5);
-  //     gameTimerSec = floor(gameTimer / 60) % 60;
-  //     text(gameTimerSec, windowWidth - windowWidth / 13.5, windowHeight / 5);
-  //     noFill();
-  //     gameTimer -= 1;
-  //     if (gameTimer <= 0) {
-  //       gameStart = false;
-  //       gameOver = true;
-  //     }
-  //   }
-  // }
-  // if (gameStart == false && gameOver == true) {
-  //   //  게임 끝
-  //   startTimer = maxStartTimer;
-  //   for (let i = 0; i < candys.length; i++) {
-  //     candys[i].init();
-  //   }
-  //   bomb.init();
+      image(scoreTime, width / 2, height / 2, windowWidth, windowHeight);
+      fill(59, 20, 93);
+      textFont(font, windowWidth / 25);
+      text(score, windowWidth / 10.5, windowHeight / 5);
+      gameTimerSec = floor(gameTimer / 60) % 60;
+      text(gameTimerSec, windowWidth - windowWidth / 13.5, windowHeight / 5);
+      noFill();
+      gameTimer -= 1;
+      if (gameTimer <= 0) {
+        gameStart = false;
+        gameOver = true;
+      }
+    }
+  }
+  if (gameStart == false && gameOver == true) {
+    //  게임 끝
+    startTimer = maxStartTimer;
+    for (let i = 0; i < candys.length; i++) {
+      candys[i].init();
+    }
+    bomb.init();
 
-  //   gameOverTimer -= 1;
-  //   console.log(Math.floor(gameOverTimer / 60) % 60);
-  //   if (gameOverTimer <= 1080 && gameOverTimer >= 900) {
-  //     image(
-  //       backGround,
-  //       windowWidth / 2,
-  //       windowHeight / 2,
-  //       windowWidth,
-  //       windowHeight
-  //     );
-  //     fill(59, 20, 93);
-  //     textFont(font, windowWidth / 25);
-  //     text(score, windowWidth / 10.5, windowHeight / 5);
-  //     text("0", windowWidth - windowWidth / 13.5, windowHeight / 5);
-  //     textFont(font, windowWidth / 15);
-  //     fill(255, 0, 0);
-  //     if (gameOverTimer <= 1080 && gameOverTimer >= 1040) {
-  //       text("GAME OVER", windowWidth / 2, windowHeight / 2);
-  //     }
-  //     if (gameOverTimer <= 1020 && gameOverTimer >= 980) {
-  //       text("GAME OVER", windowWidth / 2, windowHeight / 2);
-  //     }
-  //     if (gameOverTimer <= 960 && gameOverTimer >= 900) {
-  //       text("GAME OVER", windowWidth / 2, windowHeight / 2);
-  //     }
-  //   }
-  //   if (selectBasket == "red" && gameOverTimer < 900) {
-  //     gameOverRedVideo.loop();
-  //     console.log("video");
-  //     image(
-  //       gameOverRedVideo,
-  //       windowWidth / 2,
-  //       windowHeight / 2,
-  //       windowWidth,
-  //       windowHeight
-  //     );
-  //     if (gameOverTimer <= 600) {
-  //       // gameOverBGM.play();
-  //       // gameOnBGM.pause();
-  //       // gameOnBGM.rewind();
-  //     }
-  //   }
-  //   if (selectBasket == "blue" && gameOverTimer < 900) {
-  //     gameOverBlueVideo.loop();
-  //     if (gameOverTimer <= 600) {
-  //       // gameOverBGM.play();
-  //       // gameOnBGM.pause();
-  //       // gameOnBGM.rewind();
-  //     }
-  //   }
-  // }
+    gameOverTimer -= 1;
+    console.log(Math.floor(gameOverTimer / 60) % 60);
+    if (gameOverTimer <= 1080 && gameOverTimer >= 900) {
+      image(
+        backGround,
+        windowWidth / 2,
+        windowHeight / 2,
+        windowWidth,
+        windowHeight
+      );
+      fill(59, 20, 93);
+      textFont(font, windowWidth / 25);
+      text(score, windowWidth / 10.5, windowHeight / 5);
+      text("0", windowWidth - windowWidth / 13.5, windowHeight / 5);
+      textFont(font, windowWidth / 15);
+      fill(255, 0, 0);
+      if (gameOverTimer <= 1080 && gameOverTimer >= 1040) {
+        text("GAME OVER", windowWidth / 2, windowHeight / 2);
+      }
+      if (gameOverTimer <= 1020 && gameOverTimer >= 980) {
+        text("GAME OVER", windowWidth / 2, windowHeight / 2);
+      }
+      if (gameOverTimer <= 960 && gameOverTimer >= 900) {
+        text("GAME OVER", windowWidth / 2, windowHeight / 2);
+      }
+    }
+    if (selectBasket == "red" && gameOverTimer < 900) {
+      //gameOverRedVideo.loop();
+      // console.log("video");
+      // image(
+      //   gameOverRedVideo,
+      //   windowWidth / 2,
+      //   windowHeight / 2,
+      //   windowWidth,
+      //   windowHeight
+      // );
+      if (gameOverTimer <= 600) {
+        gameOverBGM.play();
+        gameOnBGM.pause();
+        gameOnBGM.jump(0);
+      }
+    }
+    if (selectBasket == "blue" && gameOverTimer < 900) {
+      // gameOverBlueVideo.loop();
+      if (gameOverTimer <= 600) {
+        gameOverBGM.play();
+        gameOnBGM.pause();
+        gameOnBGM.jump(0);
+      }
+    }
+  }
 }
 function mouseClicked() {
-  gameOverRedVideo.loop();
-  console.log(gameOverRedVideo.width, windowWidth);
   if (gameStart == false && gameOver == false) {
     if (
       mouseY > windowHeight / 2 &&
