@@ -102,7 +102,7 @@ function draw() {
     gameStartText.opacity();
     gameStartText.display();
 
-    gameStartBGM.loop();
+    playBgm = gameStartBGM.loop();
     gameOverBGM.pause();
     gameOverBGM.time(0);
 
@@ -175,9 +175,9 @@ function draw() {
     //  게임 끝 화면
     startTimer = maxStartTimer;
     for (let i = 0; i < candys.length; i++) {
-      candys[i].init();
+      candys[i].init(random(2, 4));
     }
-    bomb.init();
+    bomb.init(random(2, 4));
 
     gameOverTimer -= 1;
     if (gameOverTimer <= 1080 && gameOverTimer >= 900) {
@@ -383,9 +383,10 @@ class Candy {
     this.rand;
     this.c;
   }
-  init() {
+  init(newSpeed = this.speed) {
     this.x = random(50, width - 50);
     this.y = random(-width / 2, 0);
+    this.speed = newSpeed;
     this.angleAmount = random(-2, 2);
     this.rand = parseInt(random(1, 4));
     if (this.rand == 1) this.c = "Red";
@@ -394,6 +395,9 @@ class Candy {
     if (selectBasket == "red" && this.rand == 4) this.c = "Red";
     if (selectBasket == "blue" && this.rand == 4) this.c = "Blue";
   }
+  // speedInit() {
+  //   this.speed = random(2, 4);
+  // }
   move() {
     if (this.y > height) {
       this.init();
@@ -441,11 +445,15 @@ class Bomb {
     this.c = "Black";
     this.gravity = 0.003;
   }
-  init() {
+  init(newSpeed = this.speed) {
     this.x = random(50, width - 50);
     this.y = -100;
+    this.speed = newSpeed;
     this.angle = 0;
     this.angleAmount = random(-2, 2);
+  }
+  speedInit() {
+    this.speed = random(2, 4);
   }
   move() {
     if (this.y > windowHeight) {
