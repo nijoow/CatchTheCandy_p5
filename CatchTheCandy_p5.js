@@ -16,8 +16,8 @@ let startTimer = 240;
 let maxStartTimer = 240;
 let startTimerSec;
 
-let gameTimer = 240;
-let maxGameTimer = 240;
+let gameTimer = 2400;
+let maxGameTimer = 2400;
 let gameTimerSec;
 
 let gameOverTimer = 1080;
@@ -39,18 +39,16 @@ function preload() {
   candyBlack = loadImage("./src/image/candyBomb.png");
   basketRed = loadImage("./src/image/basketRed.png");
   basketBlue = loadImage("./src/image/basketBlue.png");
+  candySound = createAudio("./src/sound/candy.mp3");
+  bombSound = createAudio("./src/sound/bomb.mp3");
+  gameStartBGM = createAudio("./src/sound/gameStartBGM.mp3");
+  gameOnBGM = createAudio("./src/sound/gameOnBGM.mp3");
+  gameOverBGM = createAudio("./src/sound/gameOverBGM.mp3");
+
+  gameOverRedVideo = createVideo("./src/video/gameOverRedVideo.mp4");
+  gameOverBlueVideo = createVideo("./src/video/gameOverBlueVideo.mp4");
 
   font = loadFont("./src/font/Pixellari.ttf");
-
-  soundFormats("mp3");
-  candySound = loadSound("./src/sound/candy.mp3");
-  bombSound = loadSound("./src/sound/bomb.mp3");
-  gameStartBGM = loadSound("./src/sound/gameStartBGM.mp3");
-  gameOnBGM = loadSound("./src/sound/gameOnBGM.mp3");
-  gameOverBGM = loadSound("./src/sound/gameOverBGM.mp3");
-
-  gameOverRedVideo = createVideo(["./src/video/gameOverRedVideo.mov"]);
-  gameOverBlueVideo = createVideo(["./src/video/gameOverBlueVideo.mov"]);
 }
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -78,19 +76,14 @@ function setup() {
     candys[i].init();
   }
   bomb.init();
-  candySound.resume();
-  bombSound.resume();
-  gameStartBGM.resume();
-  gameOnBGM.resume();
-  gameOverBGM.resume();
-  // gameOverRedVideo.size(windowWidth, windowHeight);
-  // gameOverRedVideo.hide();
-  // gameOverBlueVideo.hide();
+
+  gameOverRedVideo.hide();
+  gameOverBlueVideo.hide();
 }
 
 function draw() {
   if (gameStart == false && gameOver == false) {
-    //  게임 시작전
+    //  게임 시작전 화면
     image(
       gameStartBG,
       windowWidth / 2,
@@ -108,12 +101,11 @@ function draw() {
     gameStartText.move();
     gameStartText.opacity();
     gameStartText.display();
-    if (gameStartBGM.isPlaying() == false) {
-      gameStartBGM.jump(0);
-    }
-    gameStartBGM.play();
+
+    gameStartBGM.loop();
     gameOverBGM.pause();
-    gameOverBGM.jump(0);
+    gameOverBGM.time(0);
+
     gameTimer = maxGameTimer;
     score = 0;
     gameOverTimer = maxGameOverTimer;
@@ -127,9 +119,9 @@ function draw() {
     }
   }
   if (gameStart == true && gameOver == false) {
-    //  게임화면
+    //  게임 실행 화면
     gameStartBGM.pause();
-    gameStartBGM.jump(0);
+    gameStartBGM.time(0);
     gameOnBGM.play();
     image(
       backGround,
@@ -180,7 +172,7 @@ function draw() {
     }
   }
   if (gameStart == false && gameOver == true) {
-    //  게임 끝
+    //  게임 끝 화면
     startTimer = maxStartTimer;
     for (let i = 0; i < candys.length; i++) {
       candys[i].init();
@@ -188,7 +180,6 @@ function draw() {
     bomb.init();
 
     gameOverTimer -= 1;
-    console.log(Math.floor(gameOverTimer / 60) % 60);
     if (gameOverTimer <= 1080 && gameOverTimer >= 900) {
       image(
         backGround,
@@ -214,33 +205,43 @@ function draw() {
       }
     }
     if (selectBasket == "red" && gameOverTimer < 900) {
-      //gameOverRedVideo.loop();
-      // console.log("video");
-      // image(
-      //   gameOverRedVideo,
-      //   windowWidth / 2,
-      //   windowHeight / 2,
-      //   windowWidth,
-      //   windowHeight
-      // );
+      if (gameOverRedVideo.time() < gameOverRedVideo.duration())
+        gameOverRedVideo.play();
+      image(
+        gameOverRedVideo,
+        windowWidth / 2,
+        windowHeight / 2,
+        windowWidth,
+        windowHeight
+      );
       if (gameOverTimer <= 600) {
-        gameOverBGM.play();
+        if (gameOverBGM.time() < gameOverBGM.duration()) gameOverBGM.play();
         gameOnBGM.pause();
-        gameOnBGM.jump(0);
+        gameOnBGM.time(0);
       }
     }
     if (selectBasket == "blue" && gameOverTimer < 900) {
-      // gameOverBlueVideo.loop();
+      if (gameOverBlueVideo.time() < gameOverBlueVideo.duration())
+        gameOverBlueVideo.play();
+      image(
+        gameOverBlueVideo,
+        windowWidth / 2,
+        windowHeight / 2,
+        windowWidth,
+        windowHeight
+      );
       if (gameOverTimer <= 600) {
-        gameOverBGM.play();
+        if (gameOverBGM.time() < gameOverBGM.duration()) gameOverBGM.play();
         gameOnBGM.pause();
-        gameOnBGM.jump(0);
+        gameOnBGM.time(0);
       }
     }
   }
 }
+
 function mouseClicked() {
   if (gameStart == false && gameOver == false) {
+    // 바구니 선택 & 게임 실행
     if (
       mouseY > windowHeight / 2 &&
       mouseY < windowHeight / 2 + windowHeight / 3
@@ -253,7 +254,7 @@ function mouseClicked() {
       }
     }
   }
-
+  // 게임 초기화
   if (gameStart == false && gameOver == true && gameOverTimer <= 0) {
     selectBasket = "";
     gameOverRedVideo.pause();
@@ -263,6 +264,7 @@ function mouseClicked() {
     gameOver = false;
   }
 }
+
 class GameStartText {
   constructor() {
     this.x = windowWidth / 2;
@@ -376,7 +378,7 @@ class Candy {
     this.w = candyWidth;
     this.h = candyHeight;
     this.speed = random(2, 4);
-    this.gravity = 0;
+    this.gravity = 0.003;
     this.candyScore = 0;
     this.rand;
     this.c;
@@ -391,31 +393,23 @@ class Candy {
     else if (this.rand == 3) this.c = "Green";
     if (selectBasket == "red" && this.rand == 4) this.c = "Red";
     if (selectBasket == "blue" && this.rand == 4) this.c = "Blue";
-    // if (30 <= gameTimerSec && gameTimerSec <= 40) this.speed = random(2, 4);
-    // else if (20 <= gameTimerSec && gameTimerSec < 30) this.speed = random(5, 8);
-    // else if (10 <= gameTimerSec && gameTimerSec < 20)
-    //   this.speed = random(9, 11);
-    // else this.speed = random(12, 15);
   }
   move() {
     if (this.y > height) {
       this.init();
     }
-    // if (30 <= gameTimerSec && gameTimerSec <= 40) this.gravity = 0.04;
-    // else if (20 <= gameTimerSec && gameTimerSec < 30) this.gravity = 0.07;
-    // else if (10 <= gameTimerSec && gameTimerSec < 20) this.gravity = 0.09;
-    // else this.gravity = 0.12;
     this.y += this.speed;
-    // this.speed += this.gravity;
+    this.speed += this.gravity;
   }
   catched() {
     if (
-      this.y + basketHeight / 3 > basketY &&
-      this.x > basketX - basketWidth / 2 &&
-      this.x < basketX + basketWidth / 2
+      this.y > basketY - basketHeight / 4 &&
+      this.y < basketY &&
+      this.x > basketX - basketWidth / 3 &&
+      this.x < basketX + basketWidth / 3
     ) {
-      // candySound.rewind();
-      // candySound.play();
+      if (candySound.time() < candySound.duration()) candySound.time(0);
+      candySound.play();
       let randomScore = parseInt(random(1, 4));
       this.candyScore = 10 * randomScore;
       score += this.candyScore;
@@ -445,39 +439,29 @@ class Bomb {
     this.speed = random(2, 4);
     this.bombScore = -50;
     this.c = "Black";
-    this.gravity = 0;
+    this.gravity = 0.003;
   }
   init() {
     this.x = random(50, width - 50);
     this.y = -100;
     this.angle = 0;
     this.angleAmount = random(-2, 2);
-    //   if (30 <= gameTimerSec && gameTimerSec <= 40) this.speed = random(2, 4);
-    //   else if (20 <= gameTimerSec && gameTimerSec < 30)
-    //     this.speed = random(5, 8);
-    //   else if (10 <= gameTimerSec && gameTimerSec < 20)
-    //     this.speed = random(9, 11);
-    //   else this.speed = random(12, 15);
   }
   move() {
     if (this.y > windowHeight) {
       this.init();
     }
-    // if (30 <= gameTimerSec && gameTimerSec <= 40) this.gravity = 0.04;
-    // else if (20 <= gameTimerSec && gameTimerSec < 30) this.gravity = 0.07;
-    // else if (10 <= gameTimerSec && gameTimerSec < 20) this.gravity = 0.09;
-    // else this.gravity = 0.12;
     this.y += this.speed;
-    // this.speed += this.gravity;
+    this.speed += this.gravity;
   }
   catched() {
     if (
-      this.y + 30 > basketY &&
-      this.x > basketX - 100 &&
-      this.x < basketX + 100
+      this.y > basketY - basketHeight / 4 &&
+      this.y < basketY &&
+      this.x > basketX - basketWidth / 3 &&
+      this.x < basketX + basketWidth / 3
     ) {
-      // bombSound.rewind();
-      // bombSound.play();
+      bombSound.play();
       score += this.bombScore;
       scoreText = new ScoreText(this.bombScore, this.x, this.c);
       this.init();
